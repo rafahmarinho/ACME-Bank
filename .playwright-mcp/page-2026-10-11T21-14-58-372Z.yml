@@ -1,0 +1,5 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]: ACME Bank
+    - generic [ref=e11]: Getting your workspace ready...
+  - alert [ref=e12]

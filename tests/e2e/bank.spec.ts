@@ -1,0 +1,194 @@
+import { test, expect, type Page } from "@playwright/test";
+async function ready(page: Page, path = "/") {
+  await page.goto(path, { waitUntil: "domcontentloaded" });
+  await expect(page.locator("main h1")).toBeVisible();
+}
+async function state(page: Page) {
+  return page.evaluate(() => JSON.parse(localStorage.getItem("acme-bank-world-v1") || "null"));
+}
+async function dismiss(page: Page) {
+  const button = page.getByRole("button", { name: "Dismiss message" });
+  if (await button.isVisible()) await button.click();
+}
+test("overview is responsive, charts and assets render, all customer pages work", async ({ page }) => {
+  const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
+  await ready(page);
+  await expect(page.getByRole("heading", { name: "Good morning, Alex" })).toBeVisible();
+  await expect(page.locator(".recharts-area path").first()).toBeVisible();
+  await expect.poll(() => page.locator(".user-avatar img").evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+  await page.screenshot({ path: "test-results/overview-desktop.png", fullPage: true });
+  for (const path of ["/accounts", "/activity", "/transfers", "/beneficiaries", "/scheduled-payments", "/cards", "/statements", "/support", "/profile", "/settings", "/search", "/simulation", "/onboarding"]) {
+    await ready(page, path);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await ready(page);
+  await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/overview-mobile.png", fullPage: true });
+  await page.getByRole("button", { name: "More", exact: true }).click();
+  await expect(page.locator(".sidebar.mobile-open")).toBeVisible();
+  await page.locator(".sidebar").getByRole("link", { name: "Beneficiaries", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Your people, one tap away" })).toBeVisible();
+  for (const path of ["/transfers", "/cards", "/statements", "/support", "/settings", "/simulation"]) {
+    await ready(page, path);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  expect(errors).toEqual([]);
+});
+test("transfer reviews fee, reserves, persists across reload, settles and credits recipient", async ({ page }) => {
+  await ready(page, "/transfers");
+  await page.getByLabel("Amount", { exact: true }).fill("125.00");
+  await page.getByRole("button", { name: "Review transfer" }).click();
+  await expect(page.getByText("Total debit", { exact: true })).toBeVisible();
+  await expect(page.locator(".review-total dd")).toHaveText("$125.00");
+  await page.getByRole("button", { name: "Confirm transfer" }).click();
+  await expect(page.getByRole("heading", { name: "You're all set" })).toBeVisible();
+  const pending = await state(page);
+  expect(pending.payments[0].status).toBe("pending");
+  const sender = pending.accounts[0].balance, receiver = pending.accounts[2].balance;
+  await ready(page, "/activity");
+  await page.getByLabel("Filter by status").selectOption("pending");
+  await expect(page.locator(".activity-table").getByText("Sarah Chen", { exact: true })).toBeVisible();
+  await page.reload(); await expect(page.locator("main h1")).toBeVisible();
+  expect((await state(page)).payments[0].status).toBe("pending");
+  await ready(page, "/simulation");
+  await page.getByRole("button", { name: "Advance simulation" }).click();
+  await expect(page.getByRole("status")).toContainText("saved");
+  const settled = await state(page);
+  expect(settled.payments[0].status).toBe("completed");
+  expect(settled.accounts[0].balance).toBe(sender - 12500);
+  expect(settled.accounts[2].balance).toBe(receiver + 12500);
+});
+test("external fee and insufficient funds show before confirmation", async ({ page }) => {
+  await ready(page, "/transfers");
+  await page.getByRole("combobox", { name: "Recipient", exact: true }).selectOption("beneficiary-0-2");
+  await page.getByLabel("Amount", { exact: true }).fill("100.00");
+  await page.getByRole("button", { name: "Review transfer" }).click();
+  await expect(page.locator(".review-total dd")).toHaveText("$101.50");
+  await page.getByRole("button", { name: "Back to details" }).click();
+  await page.getByLabel("Amount", { exact: true }).fill("999999.99");
+  await page.getByRole("button", { name: "Review transfer" }).click();
+  await expect(page.locator(".form-error")).toContainText("Insufficient funds");
+});
+test("freeze and limit changes persist; purchases decline then succeed", async ({ page }) => {
+  await ready(page, "/cards");
+  await page.getByRole("button", { name: "Freeze card", exact: true }).first().click();
+  await expect(page.getByRole("button", { name: "Unfreeze card" })).toBeVisible();
+  const balance = (await state(page)).accounts[0].balance;
+  await page.reload(); await expect(page.getByRole("button", { name: "Unfreeze card" })).toBeVisible();
+  await ready(page, "/simulation");
+  await page.getByRole("radio", { name: /Card purchase/ }).click();
+  await page.getByRole("button", { name: "Run scenario" }).click();
+  await expect(page.getByRole("status")).toContainText("saved");
+  expect((await state(page)).accounts[0].balance).toBe(balance);
+  expect((await state(page)).transactions[0].status).toBe("failed");
+  await ready(page, "/cards");
+  await page.getByRole("button", { name: "Unfreeze card" }).click();
+  await dismiss(page);
+  await page.getByRole("button", { name: "Change limit" }).first().click();
+  await page.getByLabel("Daily limit", { exact: true }).fill("5000.00");
+  await page.getByRole("button", { name: "Save limit" }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect((await state(page)).cards[0].limit).toBe(500000);
+  await ready(page, "/simulation");
+  await page.getByRole("radio", { name: /Card purchase/ }).click();
+  await page.getByRole("button", { name: "Run scenario" }).click();
+  await expect(page.getByRole("status")).toContainText("saved");
+  expect((await state(page)).accounts[0].balance).toBe(balance - 7850);
+});
+test("beneficiary creation, scheduled payment, cancellation, CSV and PDF downloads", async ({ page }) => {
+  await ready(page, "/beneficiaries");
+  await page.getByRole("button", { name: "Add beneficiary" }).click();
+  await page.getByLabel("Full name or business").fill("City Utilities");
+  await page.getByLabel("Bank name").fill("Chase Bank");
+  await page.getByLabel("Account number", { exact: false }).fill("12345678901");
+  await page.getByRole("button", { name: "Save beneficiary" }).click();
+  await expect(page.getByRole("heading", { name: "City Utilities" })).toBeVisible();
+  await ready(page, "/scheduled-payments");
+  await page.getByRole("button", { name: "Schedule payment", exact: true }).click();
+  await page.getByLabel("Amount", { exact: true }).fill("75.00");
+  await page.getByLabel("Payment date", { exact: true }).fill("2026-10-12");
+  await page.getByRole("button", { name: "Review payment" }).click();
+  await page.getByRole("button", { name: "Confirm transfer" }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect((await state(page)).payments[0].status).toBe("scheduled");
+  await page.getByRole("button", { name: "Cancel Sarah Chen payment" }).click();
+  await page.getByRole("button", { name: "Cancel payment", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect((await state(page)).payments[0].status).toBe("cancelled");
+  await ready(page, "/statements");
+  const csvPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "CSV", exact: true }).first().click();
+  const csv = await csvPromise; expect(csv.suggestedFilename()).toMatch(/\.csv$/);
+  const pdfPromise = page.waitForEvent("download"); await page.getByRole("button", { name: "PDF", exact: true }).first().click();
+  const pdf = await pdfPromise; expect(pdf.suggestedFilename()).toMatch(/\.pdf$/);
+});
+test("customer support message reaches staff and reply persists", async ({ page }) => {
+  await ready(page, "/support");
+  await page.getByRole("button", { name: "New conversation" }).click();
+  await page.getByLabel("Subject", { exact: true }).fill("Travel card question");
+  await page.getByLabel("Message", { exact: true }).fill("Can I use my simulated card overseas?");
+  await page.getByRole("button", { name: "Send message", exact: true }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.getByLabel("Active demo profile").selectOption("support-1");
+  await expect(page.getByRole("heading", { name: "The bigger picture" })).toBeVisible();
+  await expect(page.locator(".sidebar").getByRole("link", { name: "Transfers", exact: true })).toHaveCount(0);
+  await ready(page, "/support");
+  await page.getByRole("button", { name: /Travel card question/ }).click();
+  await page.getByLabel("Reply message").fill("Yes, your simulated card is ready for your trip.");
+  await page.getByRole("button", { name: "Send reply" }).click();
+  await expect(page.getByRole("dialog").getByText("Yes, your simulated card is ready for your trip.", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page.getByLabel("Active demo profile").selectOption("customer-1");
+  await ready(page, "/support");
+  await page.getByRole("button", { name: /Travel card question/ }).click();
+  await expect(page.getByRole("dialog").getByText("Yes, your simulated card is ready for your trip.", { exact: true })).toBeVisible();
+});
+test("onboarding opens persisted checking account and issues card", async ({ page }) => {
+  await ready(page, "/onboarding");
+  await page.getByLabel("Account nickname (optional)").fill("Travel Fund");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Open my account" }).click();
+  await expect(page.getByRole("heading", { name: "Welcome to your next chapter." })).toBeVisible();
+  expect((await state(page)).accounts.at(-1).name).toBe("Travel Fund");
+  expect((await state(page)).cards.length).toBe(13);
+  await ready(page, "/accounts");
+  await expect(page.getByRole("heading", { name: "Travel Fund" })).toBeVisible();
+});
+test("login, recovery, profile, global search, reset and unauthenticated API", async ({ page, request }) => {
+  await ready(page);
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  const auth = page.locator(".auth-page:visible");
+  await expect(auth.getByRole("heading", { name: "Welcome back." })).toBeVisible();
+  await auth.getByLabel("Password", { exact: true }).fill("wrong");
+  await auth.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(auth.locator(".form-error")).toContainText("incorrect");
+  await auth.getByRole("link", { name: "Forgot password?" }).click();
+  await auth.getByRole("button", { name: "Send recovery link" }).click();
+  await auth.getByRole("link", { name: "Open simulated recovery email" }).click();
+  await auth.getByLabel("New password").fill("ChangedDemo!2026");
+  await auth.getByRole("button", { name: "Update password" }).click();
+  await expect(auth.getByText("Your password has been updated. You can now sign in.")).toBeVisible();
+  await auth.getByRole("link", { name: "Back to sign in" }).click();
+  await auth.getByLabel("Password", { exact: true }).fill("ChangedDemo!2026");
+  await auth.getByRole("button", { name: "Sign in", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Good morning, Alex" })).toBeVisible();
+  await ready(page, "/profile");
+  await page.getByLabel("Phone number").fill("+1 415 555 9999");
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("status")).toContainText("saved");
+  await page.reload(); await expect(page.getByLabel("Phone number")).toHaveValue("+1 415 555 9999");
+  await ready(page, "/search?q=Spotify");
+  await expect(page.locator(".search-result")).not.toHaveCount(0);
+  await ready(page, "/simulation");
+  await page.getByRole("button", { name: "Run scenario" }).click();
+  await expect(page.getByRole("status")).toContainText("saved");
+  await dismiss(page);
+  await page.getByRole("button", { name: "Reset demo data", exact: true }).click();
+  await page.getByRole("button", { name: "Reset all demo data" }).click();
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  expect((await state(page)).version).toBeGreaterThan(1);
+  expect((await state(page)).events).toHaveLength(1);
+  const response = await request.get("/api/bank"); expect(response.status()).toBe(401);
+});

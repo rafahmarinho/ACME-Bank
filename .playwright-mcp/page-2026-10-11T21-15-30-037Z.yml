@@ -1,0 +1,242 @@
+- generic [active] [ref=f1e1]:
+  - alert [ref=f1e2]
+  - generic [ref=f1e3]:
+    - complementary [ref=f1e4]:
+      - link "ACME Bank" [ref=f1e5] [cursor=pointer]:
+        - /url: /
+      - button "Close menu" [ref=f1e12] [cursor=pointer]
+      - generic [ref=f1e16]: PERSONAL BANKING
+      - navigation [ref=f1e20]:
+        - link "Overview" [ref=f1e21] [cursor=pointer]:
+          - /url: /
+        - link "Accounts" [ref=f1e28] [cursor=pointer]:
+          - /url: /accounts
+        - link "Activity" [ref=f1e33] [cursor=pointer]:
+          - /url: /activity
+        - link "Transfers" [ref=f1e37] [cursor=pointer]:
+          - /url: /transfers
+        - link "Beneficiaries" [ref=f1e42] [cursor=pointer]:
+          - /url: /beneficiaries
+        - link "Scheduled payments 1" [ref=f1e49] [cursor=pointer]:
+          - /url: /scheduled-payments
+          - generic [ref=f1e54]: Scheduled payments
+          - generic [ref=f1e55]: "1"
+        - link "Cards" [ref=f1e56] [cursor=pointer]:
+          - /url: /cards
+        - link "Statements" [ref=f1e60] [cursor=pointer]:
+          - /url: /statements
+      - navigation [ref=f1e66]:
+        - link "Support" [ref=f1e67] [cursor=pointer]:
+          - /url: /support
+        - link "Settings" [ref=f1e71] [cursor=pointer]:
+          - /url: /settings
+        - link "Simulation" [ref=f1e76] [cursor=pointer]:
+          - /url: /simulation
+      - generic [ref=f1e80]:
+        - generic [ref=f1e81]: Demo workspace
+        - generic [ref=f1e87]: © 2026 ACME Bank
+    - generic [ref=f1e88]:
+      - banner [ref=f1e89]:
+        - link "ACME Bank" [ref=f1e91] [cursor=pointer]:
+          - /url: /
+        - generic [ref=f1e98]:
+          - button "Notifications" [ref=f1e100] [cursor=pointer]
+          - link "Open profile" [ref=f1e102] [cursor=pointer]:
+            - /url: /profile
+            - img "Alex Morgan" [ref=f1e104]
+      - main [ref=f1e105]:
+        - generic [ref=f1e107]:
+          - heading "Good morning, Alex" [level=1] [ref=f1e108]
+          - paragraph [ref=f1e109]: Here's what's happening with your money today.
+        - generic [ref=f1e110]:
+          - generic [ref=f1e111]:
+            - generic [ref=f1e112]:
+              - generic [ref=f1e113]: Total available balance
+              - button "Hide balances" [ref=f1e114] [cursor=pointer]
+            - generic [ref=f1e115]:
+              - text: $30,490.69
+              - generic [ref=f1e116]: USD
+            - generic [ref=f1e117]: Across 2 active accounts
+          - generic [ref=f1e122]:
+            - generic [ref=f1e123]: Money in
+            - generic [ref=f1e129]: $2,450.00
+            - generic [ref=f1e130]:
+              - generic [ref=f1e131]: Income
+              - generic [ref=f1e135]: This month
+          - generic [ref=f1e136]:
+            - generic [ref=f1e137]: Money out
+            - generic [ref=f1e143]: $237.91
+            - generic [ref=f1e144]:
+              - generic [ref=f1e145]: Spending & payments
+              - generic [ref=f1e146]: This month
+        - generic [ref=f1e147]:
+          - generic [ref=f1e148]:
+            - generic [ref=f1e149]:
+              - generic [ref=f1e150]:
+                - heading "Balance overview" [level=2] [ref=f1e151]
+                - combobox "Chart period" [ref=f1e152] [cursor=pointer]:
+                  - option "Last 30 days" [selected]
+                  - option "Last 60 days"
+                  - option "Last 7 days"
+              - generic [ref=f1e153]:
+                - text: Total balance
+                - strong [ref=f1e155]: $30,490.69
+                - generic [ref=f1e156]: USD
+              - application [ref=f1e160]:
+                - generic [ref=f1e170]:
+                  - generic [ref=f1e171]:
+                    - generic [ref=f1e172]: Sep 21
+                    - generic [ref=f1e174]: Oct 1
+                    - generic [ref=f1e176]: Oct 11
+                  - generic [ref=f1e178]:
+                    - generic [ref=f1e179]: $22.028599999999997k
+                    - generic [ref=f1e181]: $25.028599999999997k
+                    - generic [ref=f1e183]: $28.028599999999997k
+                    - generic [ref=f1e185]: $31.028599999999997k
+                    - generic [ref=f1e187]: $32.599599999999995k
+            - generic [ref=f1e189]:
+              - heading "Quick actions" [level=2] [ref=f1e191]
+              - generic [ref=f1e192]:
+                - link "Send money" [ref=f1e193] [cursor=pointer]:
+                  - /url: /transfers
+                - link "Add money" [ref=f1e199] [cursor=pointer]:
+                  - /url: /accounts
+                - link "Schedule payment" [ref=f1e203] [cursor=pointer]:
+                  - /url: /scheduled-payments
+                - link "View statements" [ref=f1e210] [cursor=pointer]:
+                  - /url: /statements
+            - generic [ref=f1e216]:
+              - generic [ref=f1e217]:
+                - heading "Recent activity" [level=2] [ref=f1e218]
+                - link "View all activity" [ref=f1e219] [cursor=pointer]:
+                  - /url: /activity
+              - table [ref=f1e223]:
+                - rowgroup [ref=f1e224]:
+                  - row [ref=f1e225]:
+                    - columnheader "Transaction" [ref=f1e226]
+                    - columnheader "Amount" [ref=f1e227]
+                    - columnheader "Details" [ref=f1e228]
+                - rowgroup [ref=f1e230]:
+                  - row [ref=f1e231]:
+                    - cell [ref=f1e232]:
+                      - button "Whole Foods Market Card payment" [ref=f1e233] [cursor=pointer]:
+                        - generic [ref=f1e238]:
+                          - strong [ref=f1e239]: Whole Foods Market
+                          - generic [ref=f1e240]: Card payment
+                    - cell "−$86.42" [ref=f1e241]
+                    - cell [ref=f1e242]:
+                      - button "Details for Whole Foods Market" [ref=f1e243] [cursor=pointer]
+                  - row [ref=f1e244]:
+                    - cell [ref=f1e245]:
+                      - button "Blue Bottle Coffee Card payment" [ref=f1e246] [cursor=pointer]:
+                        - generic [ref=f1e250]:
+                          - strong [ref=f1e251]: Blue Bottle Coffee
+                          - generic [ref=f1e252]: Card payment
+                    - cell "−$6.50" [ref=f1e253]
+                    - cell [ref=f1e254]:
+                      - button "Details for Blue Bottle Coffee" [ref=f1e255] [cursor=pointer]
+                  - row [ref=f1e256]:
+                    - cell [ref=f1e257]:
+                      - button "Spotify Premium Card payment" [ref=f1e258] [cursor=pointer]:
+                        - generic [ref=f1e264]:
+                          - strong [ref=f1e265]: Spotify Premium
+                          - generic [ref=f1e266]: Card payment
+                    - cell "−$15.99" [ref=f1e267]
+                    - cell [ref=f1e268]:
+                      - button "Details for Spotify Premium" [ref=f1e269] [cursor=pointer]
+                  - row [ref=f1e270]:
+                    - cell [ref=f1e271]:
+                      - button "Apple Card payment" [ref=f1e272] [cursor=pointer]:
+                        - generic [ref=f1e277]:
+                          - strong [ref=f1e278]: Apple
+                          - generic [ref=f1e279]: Card payment
+                    - cell "−$129.00" [ref=f1e280]
+                    - cell [ref=f1e281]:
+                      - button "Details for Apple" [ref=f1e282] [cursor=pointer]
+                  - row [ref=f1e283]:
+                    - cell [ref=f1e284]:
+                      - button "Acme Studio · Project payment Bank deposit" [ref=f1e285] [cursor=pointer]:
+                        - generic [ref=f1e290]:
+                          - strong [ref=f1e291]: Acme Studio · Project payment
+                          - generic [ref=f1e292]: Bank deposit
+                    - cell "+$2,450.00" [ref=f1e293]
+                    - cell [ref=f1e294]:
+                      - button "Details for Acme Studio · Project payment" [ref=f1e295] [cursor=pointer]
+          - complementary [ref=f1e296]:
+            - generic [ref=f1e297]:
+              - generic [ref=f1e298]:
+                - heading "My cards" [level=2] [ref=f1e299]
+                - link "Manage cards" [ref=f1e300] [cursor=pointer]:
+                  - /url: /cards
+              - generic [ref=f1e305]:
+                - generic [ref=f1e306]:
+                  - generic [ref=f1e307]: ACME Bank
+                  - generic [ref=f1e313]: DEBIT
+                - generic [ref=f1e322]:
+                  - text: ••••
+                  - generic [ref=f1e323]: ••••
+                  - generic [ref=f1e324]: ••••
+                  - text: "4821"
+                - generic [ref=f1e325]:
+                  - generic [ref=f1e326]:
+                    - generic [ref=f1e327]: CARDHOLDER
+                    - generic [ref=f1e328]: ALEX MORGAN
+                  - generic [ref=f1e329]:
+                    - generic [ref=f1e330]: VALID THRU
+                    - generic [ref=f1e331]: 09/29
+                  - strong [ref=f1e332]: VISA
+              - generic [ref=f1e337]:
+                - button "Previous card" [ref=f1e338] [cursor=pointer]
+                - button "Next card" [ref=f1e339] [cursor=pointer]
+              - generic [ref=f1e340]:
+                - button "Freeze card" [ref=f1e341] [cursor=pointer]
+                - link "Manage" [ref=f1e342] [cursor=pointer]:
+                  - /url: /cards
+            - generic [ref=f1e345]:
+              - generic [ref=f1e346]:
+                - heading "My accounts" [level=2] [ref=f1e347]
+                - link "View all" [ref=f1e348] [cursor=pointer]:
+                  - /url: /accounts
+              - link "Everyday Checking •••• 4821 $15,040.69" [ref=f1e351] [cursor=pointer]:
+                - /url: /accounts?account=customer-1-checking
+                - generic [ref=f1e356]:
+                  - strong [ref=f1e357]: Everyday Checking
+                  - generic [ref=f1e358]: •••• 4821
+                - generic [ref=f1e359]: $15,040.69
+              - link "Growth Savings •••• 9036 $15,450.00" [ref=f1e360] [cursor=pointer]:
+                - /url: /accounts?account=customer-1-savings
+                - generic [ref=f1e365]:
+                  - strong [ref=f1e366]: Growth Savings
+                  - generic [ref=f1e367]: •••• 9036
+                - generic [ref=f1e368]: $15,450.00
+            - generic [ref=f1e369]:
+              - heading "Coming up" [level=2] [ref=f1e371]
+              - generic [ref=f1e376]:
+                - generic [ref=f1e377]:
+                  - generic [ref=f1e378]: Nov
+                  - strong [ref=f1e379]: "1"
+                - generic [ref=f1e380]:
+                  - strong [ref=f1e381]: Maple Apartments
+                  - generic [ref=f1e382]: November rent
+                - strong [ref=f1e383]: $1,750.00
+              - link "Manage scheduled payments" [ref=f1e384] [cursor=pointer]:
+                - /url: /scheduled-payments
+            - link [ref=f1e387] [cursor=pointer]:
+              - /url: /support
+              - generic [ref=f1e391]:
+                - strong [ref=f1e392]: A little peace of mind.
+                - paragraph [ref=f1e393]: We're here when you need us.
+      - contentinfo [ref=f1e397]:
+        - generic [ref=f1e398]: ACME Bank. Make room for more.
+        - generic [ref=f1e399]: Simulated banking · Saved in this browser
+    - navigation "Mobile navigation" [ref=f1e403]:
+      - link "Overview" [ref=f1e404] [cursor=pointer]:
+        - /url: /
+      - link "Accounts" [ref=f1e411] [cursor=pointer]:
+        - /url: /accounts
+      - link "Transfers" [ref=f1e416] [cursor=pointer]:
+        - /url: /transfers
+      - link "Cards" [ref=f1e421] [cursor=pointer]:
+        - /url: /cards
+      - button "More" [ref=f1e425] [cursor=pointer]
+  - generic [aria-hidden] [ref=f1e428]: $22.028599999999997k
